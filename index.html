@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RUYA — Photographer & Videographer</title>
+  <meta name="description" content="RUYA — See it. Frame it. Remember it. Professional photography & videography." />
+  <meta name="theme-color" content="#090909" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ruya: {
+              black: '#090909',
+              offwhite: '#F4F4F1',
+              silver: '#B9BDC0',
+            }
+          },
+          fontFamily: {
+            sans: ['Montserrat', 'Noto Sans Arabic', 'system-ui', 'sans-serif'],
+            arabic: ['Noto Sans Arabic', 'Montserrat', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    :root {
+      --black: #090909;
+      --offwhite: #F4F4F1;
+      --silver: #B9BDC0;
+    }
+    
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--black);
+      color: var(--offwhite);
+      overflow-x: hidden;
+    }
+    
+    /* Language system */
+    .lang-ar { display: none !important; }
+    html[lang="ar"] .lang-en { display: none !important; }
+    html[lang="ar"] .lang-ar { display: inline !important; }
+    html[lang="ar"] .lang-ar-block { display: block !important; }
+    html[lang="en"] .lang-ar-block { display: none !important; }
+    
+    /* Film grain */
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #090909; }
+    ::-webkit-scrollbar-thumb { background: #B9BDC0; border-radius: 3px; }
+    
+    /* Reveal animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Hero specific */
+    .hero-logo {
+      opacity: 0;
+      transform: scale(0.92);
+      transition: opacity 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.3s, transform 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+    }
+    .hero-logo.loaded {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .hero-text {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1) 0.8s, transform 1s cubic-bezier(0.16, 1, 0.3, 1) 0.8s;
+    }
+    .hero-text.loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .hero-cta {
+      opacity: 0;
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1) 1.3s;
+    }
+    .hero-cta.loaded {
+      opacity: 1;
+    }
+    
+    /* Optical rings animation */
+    @keyframes ring-pulse {
+      0%, 100% { opacity: 0.15; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(1.03); }
+    }
+    .ring {
+      animation: ring-pulse 6s ease-in-out infinite;
+    }
+    .ring:nth-child(2) { animation-delay: 0.8s; }
+    .ring:nth-child(3) { animation-delay: 1.6s; }
+    
+    /* Work card */
+    .work-card {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(145deg, #111 0%, #0a0a0a 100%);
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+    }
+    .work-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 30px 60px -20px rgba(0,0,0,0.7);
+    }
+    .work-card .overlay {
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .work-card:hover .overlay {
+      opacity: 1;
+    }
+    .work-card .play-btn {
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease;
+    }
+    .work-card:hover .play-btn {
+      transform: scale(1.15);
+      background: rgba(244,244,241,0.15);
+    }
+    
+    /* Magnetic button feel */
+    .btn-primary {
+      position: relative;
+      overflow: hidden;
+      transition: color 0.4s ease, border-color 0.4s ease;
+    }
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--offwhite);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: -1;
+    }
+    .btn-primary:hover {
+      color: var(--black);
+      border-color: var(--offwhite);
+    }
+    .btn-primary:hover::before {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+    
+    /* Service cards */
+    .service-card {
+      transition: border-color 0.4s ease, transform 0.4s ease;
+    }
+    .service-card:hover {
+      border-color: rgba(185,189,192,0.4);
+      transform: translateY(-4px);
+    }
+    
+    /* Nav */
+    .nav-scrolled {
+      background: rgba(9,9,9,0.92) !important;
+      backdrop-filter: blur(16px);
+      border-bottom-color: rgba(185,189,192,0.12) !important;
+    }
+    
+    /* Cursor glow (desktop) */
+    @media (hover: hover) {
+      .cursor-glow {
+        position: fixed;
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(185,189,192,0.06) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 1;
+        transform: translate(-50%, -50%);
+        transition: opacity 0.3s ease;
+      }
+    }
+    
+    /* Loader */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: #090909;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+    #loader.done {
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    .loader-rings {
+      position: relative;
+      width: 80px;
+      height: 80px;
+    }
+    .loader-rings span {
+      position: absolute;
+      border: 1.5px solid rgba(244,244,241,0.4);
+      border-radius: 50%;
+      animation: loader-spin 2.4s ease-in-out infinite;
+    }
+    .loader-rings span:nth-child(1) { width: 40px; height: 40px; top: 20px; left: 20px; animation-delay: 0s; }
+    .loader-rings span:nth-child(2) { width: 60px; height: 60px; top: 10px; left: 10px; animation-delay: 0.2s; }
+    .loader-rings span:nth-child(3) { width: 80px; height: 80px; top: 0; left: 0; animation-delay: 0.4s; }
+    
+    @keyframes loader-spin {
+      0%, 100% { opacity: 0.2; transform: scale(0.9); }
+      50% { opacity: 0.7; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="font-sans antialiased selection:bg-ruya-silver/30">
+
+  <!-- LOADER -->
+  <div id="loader">
+    <div class="loader-rings">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </div>
+
+  <!-- FILM GRAIN -->
+  <div class="grain"></div>
+  
+  <!-- CURSOR GLOW (desktop) -->
+  <div class="cursor-glow hidden md:block" id="cursorGlow"></div>
+
+  <!-- NAVBAR -->
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b border-transparent">
+    <div class="max-w-7xl mx-auto px-5 md:px-8 py-5 flex items-center justify-between">
+      <a href="#hero" class="flex items-center group">
+        <img src="assets/logo-white.png" alt="RUYA" class="h-7 md:h-8 w-auto transition-opacity group-hover:opacity-80" />
+      </a>
+      
+      <div class="hidden md:flex items-center gap-10 text-[11px] tracking-[0.25em] uppercase font-medium">
+        <a href="#about" class="text-ruya-silver hover:text-ruya-offwhite transition-colors duration-300">
+          <span class="lang-en">About</span>
+          <span class="lang-ar font-arabic tracking-normal">من نحن</span>
+        </a>
+        <a href="#work" class="text-ruya-silver hover:text-ruya-offwhite transition-colors duration-300">
+          <span class="lang-en">Work</span>
+          <span class="lang-ar font-arabic tracking-normal">الأعمال</span>
+        </a>
+        <a href="#services" class="text-ruya-silver hover:text-ruya-offwhite transition-colors duration-300">
+          <span class="lang-en">Services</span>
+          <span class="lang-ar font-arabic tracking-normal">الخدمات</span>
+        </a>
+        <a href="#contact" class="text-ruya-silver hover:text-ruya-offwhite transition-colors duration-300">
+          <span class="lang-en">Contact</span>
+          <span class="lang-ar font-arabic tracking-normal">تواصل</span>
+        </a>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <button id="langToggle" class="text-[10px] tracking-[0.2em] uppercase border border-ruya-silver/30 px-3 py-1.5 hover:border-ruya-offwhite hover:bg-ruya-offwhite hover:text-ruya-black transition-all duration-300">
+          <span class="lang-en">عربي</span>
+          <span class="lang-ar">EN</span>
+        </button>
+        
+        <button id="mobileMenuBtn" class="md:hidden w-9 h-9 flex items-center justify-center text-ruya-offwhite">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden border-t border-ruya-silver/10 bg-ruya-black/98 backdrop-blur-xl">
+      <div class="flex flex-col px-6 py-6 gap-1 text-[12px] tracking-[0.2em] uppercase">
+        <a href="#about" class="py-3 text-ruya-silver hover:text-ruya-offwhite">
+          <span class="lang-en">About</span>
+          <span class="lang-ar font-arabic tracking-normal">من نحن</span>
+        </a>
+        <a href="#work" class="py-3 text-ruya-silver hover:text-ruya-offwhite">
+          <span class="lang-en">Work</span>
+          <span class="lang-ar font-arabic tracking-normal">الأعمال</span>
+        </a>
+        <a href="#services" class="py-3 text-ruya-silver hover:text-ruya-offwhite">
+          <span class="lang-en">Services</span>
+          <span class="lang-ar font-arabic tracking-normal">الخدمات</span>
+        </a>
+        <a href="#contact" class="py-3 text-ruya-silver hover:text-ruya-offwhite">
+          <span class="lang-en">Contact</span>
+          <span class="lang-ar font-arabic tracking-normal">تواصل</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ==================== HERO ==================== -->
+  <section id="hero" class="relative min-h-screen flex flex-col items-center justify-center overflow-hidden pt-24 md:pt-28">
+    <!-- Background optical rings -->
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+      <div class="relative w-[600px] h-[600px] md:w-[900px] md:h-[900px]">
+        <div class="ring absolute inset-[15%] border border-ruya-silver/20 rounded-full"></div>
+        <div class="ring absolute inset-[8%] border border-ruya-silver/15 rounded-full"></div>
+        <div class="ring absolute inset-0 border border-ruya-silver/10 rounded-full"></div>
+        <!-- Crosshair -->
+        <div class="absolute top-1/2 left-0 right-0 h-px bg-ruya-silver/10"></div>
+        <div class="absolute left-1/2 top-0 bottom-0 w-px bg-ruya-silver/10"></div>
+      </div>
+    </div>
+    
+    <!-- Gradient vignette -->
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#090909_70%)]"></div>
+    
+    <div class="relative z-10 text-center px-6 max-w-5xl mx-auto">
+      <!-- Logo -->
+      <div class="hero-logo mb-10 md:mb-14">
+        <img src="assets/logo-white.png" alt="RUYA" class="mx-auto h-14 md:h-20 lg:h-24 w-auto drop-shadow-2xl" />
+      </div>
+      
+      <!-- Tagline -->
+      <div class="hero-text">
+        <p class="text-ruya-silver/80 tracking-[0.4em] text-[10px] md:text-xs uppercase mb-6 font-medium">
+          <span class="lang-en">Photographer &nbsp;·&nbsp; Videographer</span>
+          <span class="lang-ar font-arabic tracking-widest">مصور &nbsp;·&nbsp; مصور فيديو</span>
+        </p>
+        
+        <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light tracking-tight leading-[1.1] mb-8">
+          <span class="lang-en">SEE IT.<br>FRAME IT.<br><span class="text-ruya-silver">REMEMBER IT.</span></span>
+          <span class="lang-ar font-arabic text-4xl sm:text-5xl md:text-6xl leading-snug">شوفها.<br>صوّرها.<br><span class="text-ruya-silver">تذكّرها.</span></span>
+        </h1>
+        
+        <p class="text-ruya-silver text-sm md:text-base tracking-[0.25em] uppercase mb-14 font-light">
+          <span class="lang-en">Precision &nbsp;/&nbsp; Vision &nbsp;/&nbsp; Memory</span>
+          <span class="lang-ar font-arabic tracking-normal">دقة &nbsp;/&nbsp; رؤية &nbsp;/&nbsp; ذاكرة</span>
+        </p>
+      </div>
+      
+      <!-- CTA -->
+      <div class="hero-cta flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#work" class="btn-primary inline-block border border-ruya-offwhite px-10 py-4 text-[11px] tracking-[0.25em] uppercase font-medium">
+          <span class="lang-en">View Work</span>
+          <span class="lang-ar font-arabic tracking-normal">شاهد الأعمال</span>
+        </a>
+        <a href="#contact" class="inline-block border border-ruya-silver/30 px-10 py-4 text-[11px] tracking-[0.25em] uppercase text-ruya-silver hover:border-ruya-offwhite hover:text-ruya-offwhite transition-all duration-300">
+          <span class="lang-en">Get in Touch</span>
+          <span class="lang-ar font-arabic tracking-normal">تواصل معنا</span>
+        </a>
+      </div>
+    </div>
+    
+    <!-- Scroll indicator -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-60">
+      <span class="text-[9px] tracking-[0.3em] uppercase text-ruya-silver">Scroll</span>
+      <div class="w-px h-10 bg-gradient-to-b from-ruya-silver to-transparent"></div>
+    </div>
+  </section>
+
+  <!-- ==================== ABOUT ==================== -->
+  <section id="about" class="relative py-28 md:py-40 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+        
+        <!-- Left content -->
+        <div class="lg:col-span-6 reveal">
+          <p class="text-ruya-silver text-[10px] tracking-[0.35em] uppercase mb-5 font-medium">
+            <span class="lang-en">01 — The Idea</span>
+            <span class="lang-ar font-arabic tracking-normal">01 — الفكرة</span>
+          </p>
+          
+          <h2 class="text-3xl md:text-4xl lg:text-5xl font-light leading-[1.15] mb-8">
+            <span class="lang-en">One mark.<br>Two languages.</span>
+            <span class="lang-ar font-arabic">علامة واحدة.<br>لغتان.</span>
+          </h2>
+          
+          <div class="space-y-5 text-ruya-silver/90 leading-relaxed text-[15px] md:text-base">
+            <p>
+              <span class="lang-en">
+                RUYA is a visual storytelling practice rooted in precision and emotion. 
+                We craft images and films that linger — moments framed with intention, 
+                light, and memory.
+              </span>
+              <span class="lang-ar font-arabic leading-loose">
+                رؤية هي ممارسة سرد بصري متجذرة في الدقة والعاطفة. 
+                نصنع صوراً وأفلاماً تبقى في الذاكرة — لحظات مؤطرة بقصد، 
+                ضوء، وذاكرة.
+              </span>
+            </p>
+            <p>
+              <span class="lang-en">
+                From intimate portraits to cinematic productions, every frame is built 
+                to be seen, felt, and remembered.
+              </span>
+              <span class="lang-ar font-arabic leading-loose">
+                من البورتريهات الحميمة إلى الإنتاجات السينمائية، كل إطار 
+                مبني ليُرى ويُحس ويُتذكر.
+              </span>
+            </p>
+          </div>
+          
+          <!-- Brand promise pills -->
+          <div class="flex flex-wrap gap-3 mt-10">
+            <span class="border border-ruya-silver/25 px-4 py-2 text-[10px] tracking-[0.2em] uppercase text-ruya-silver">Precision</span>
+            <span class="border border-ruya-silver/25 px-4 py-2 text-[10px] tracking-[0.2em] uppercase text-ruya-silver">Vision</span>
+            <span class="border border-ruya-silver/25 px-4 py-2 text-[10px] tracking-[0.2em] uppercase text-ruya-silver">Memory</span>
+          </div>
+        </div>
+        
+        <!-- Right visual - Portrait -->
+        <div class="lg:col-span-6 reveal">
+          <div class="relative aspect-[4/5] border border-ruya-silver/10 overflow-hidden group">
+            <img 
+              src="assets/portrait.jpg" 
+              alt="RUYA — Photographer & Videographer" 
+              class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+            />
+            <!-- Subtle gradient overlay -->
+            <div class="absolute inset-0 bg-gradient-to-t from-ruya-black/40 via-transparent to-transparent"></div>
+            
+            <!-- Corner marks (optical frame) -->
+            <div class="absolute top-4 left-4 w-6 h-6 border-t border-l border-ruya-offwhite/50"></div>
+            <div class="absolute top-4 right-4 w-6 h-6 border-t border-r border-ruya-offwhite/50"></div>
+            <div class="absolute bottom-4 left-4 w-6 h-6 border-b border-l border-ruya-offwhite/50"></div>
+            <div class="absolute bottom-4 right-4 w-6 h-6 border-b border-r border-ruya-offwhite/50"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== WORK ==================== -->
+  <section id="work" class="relative py-28 md:py-40 px-6 border-t border-ruya-silver/8">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 md:mb-20 reveal">
+        <div>
+          <p class="text-ruya-silver text-[10px] tracking-[0.35em] uppercase mb-4 font-medium">
+            <span class="lang-en">02 — Selected Work</span>
+            <span class="lang-ar font-arabic tracking-normal">02 — أعمال مختارة</span>
+          </p>
+          <h2 class="text-3xl md:text-4xl lg:text-5xl font-light">
+            <span class="lang-en">Recent Projects</span>
+            <span class="lang-ar font-arabic">أحدث المشاريع</span>
+          </h2>
+        </div>
+        <p class="text-ruya-silver/60 text-sm max-w-xs">
+          <span class="lang-en">A selection of cinematic, commercial and personal work.</span>
+          <span class="lang-ar font-arabic">مجموعة من الأعمال السينمائية والتجارية والشخصية.</span>
+        </p>
+      </div>
+      
+      <!-- Work Grid - asymmetric for more interest -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
+        
+        <!-- Large featured -->
+        <div class="md:col-span-8 work-card aspect-[16/10] md:aspect-[16/9] border border-ruya-silver/10 reveal cursor-pointer group">
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="play-btn w-16 h-16 md:w-20 md:h-20 rounded-full border border-ruya-offwhite/50 flex items-center justify-center backdrop-blur-sm">
+              <svg class="w-6 h-6 md:w-7 md:h-7 text-ruya-offwhite ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-6 md:p-8">
+            <div>
+              <p class="text-[10px] tracking-[0.25em] uppercase text-ruya-silver mb-2">
+                <span class="lang-en">Cinematic · 2025</span>
+                <span class="lang-ar font-arabic tracking-normal">سينمائي · 2025</span>
+              </p>
+              <h3 class="text-xl md:text-2xl font-light">
+                <span class="lang-en">Featured Project Title</span>
+                <span class="lang-ar font-arabic">عنوان المشروع المميز</span>
+              </h3>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Side card -->
+        <div class="md:col-span-4 work-card aspect-[16/10] md:aspect-auto md:h-full border border-ruya-silver/10 reveal cursor-pointer group">
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="play-btn w-14 h-14 rounded-full border border-ruya-offwhite/50 flex items-center justify-center">
+              <svg class="w-5 h-5 text-ruya-offwhite ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-6">
+            <div>
+              <p class="text-[10px] tracking-[0.25em] uppercase text-ruya-silver mb-1">
+                <span class="lang-en">Documentary</span>
+                <span class="lang-ar font-arabic tracking-normal">وثائقي</span>
+              </p>
+              <h3 class="text-lg font-light">
+                <span class="lang-en">Project Two</span>
+                <span class="lang-ar font-arabic">المشروع الثاني</span>
+              </h3>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bottom row -->
+        <div class="md:col-span-4 work-card aspect-[16/10] border border-ruya-silver/10 reveal cursor-pointer group">
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="play-btn w-14 h-14 rounded-full border border-ruya-offwhite/50 flex items-center justify-center">
+              <svg class="w-5 h-5 text-ruya-offwhite ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-6">
+            <div>
+              <p class="text-[10px] tracking-[0.25em] uppercase text-ruya-silver mb-1">
+                <span class="lang-en">Commercial</span>
+                <span class="lang-ar font-arabic tracking-normal">إعلاني</span>
+              </p>
+              <h3 class="text-lg font-light">
+                <span class="lang-en">Project Three</span>
+                <span class="lang-ar font-arabic">المشروع الثالث</span>
+              </h3>
+            </div>
+          </div>
+        </div>
+        
+        <div class="md:col-span-4 work-card aspect-[16/10] border border-ruya-silver/10 reveal cursor-pointer group">
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="play-btn w-14 h-14 rounded-full border border-ruya-offwhite/50 flex items-center justify-center">
+              <svg class="w-5 h-5 text-ruya-offwhite ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-6">
+            <div>
+              <p class="text-[10px] tracking-[0.25em] uppercase text-ruya-silver mb-1">
+                <span class="lang-en">Portrait</span>
+                <span class="lang-ar font-arabic tracking-normal">بورتريه</span>
+              </p>
+              <h3 class="text-lg font-light">
+                <span class="lang-en">Project Four</span>
+                <span class="lang-ar font-arabic">المشروع الرابع</span>
+              </h3>
+            </div>
+          </div>
+        </div>
+        
+        <div class="md:col-span-4 work-card aspect-[16/10] border border-ruya-silver/10 reveal cursor-pointer group">
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="play-btn w-14 h-14 rounded-full border border-ruya-offwhite/50 flex items-center justify-center">
+              <svg class="w-5 h-5 text-ruya-offwhite ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="overlay absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end p-6">
+            <div>
+              <p class="text-[10px] tracking-[0.25em] uppercase text-ruya-silver mb-1">
+                <span class="lang-en">Short Film</span>
+                <span class="lang-ar font-arabic tracking-normal">فيلم قصير</span>
+              </p>
+              <h3 class="text-lg font-light">
+                <span class="lang-en">Project Five</span>
+                <span class="lang-ar font-arabic">المشروع الخامس</span>
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SERVICES ==================== -->
+  <section id="services" class="relative py-28 md:py-40 px-6 border-t border-ruya-silver/8">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16 md:mb-20 reveal">
+        <p class="text-ruya-silver text-[10px] tracking-[0.35em] uppercase mb-4 font-medium">
+          <span class="lang-en">03 — Services</span>
+          <span class="lang-ar font-arabic tracking-normal">03 — الخدمات</span>
+        </p>
+        <h2 class="text-3xl md:text-4xl lg:text-5xl font-light">
+          <span class="lang-en">What We Offer</span>
+          <span class="lang-ar font-arabic">ما نقدمه</span>
+        </h2>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-5">
+        <div class="service-card border border-ruya-silver/12 p-8 md:p-10 reveal">
+          <div class="w-12 h-12 mb-8 border border-ruya-silver/25 rounded-full flex items-center justify-center">
+            <span class="text-ruya-silver text-xs tracking-wider">01</span>
+          </div>
+          <h3 class="text-xl md:text-2xl font-light mb-4">
+            <span class="lang-en">Cinematography</span>
+            <span class="lang-ar font-arabic">التصوير السينمائي</span>
+          </h3>
+          <p class="text-ruya-silver/80 text-sm leading-relaxed">
+            <span class="lang-en">Narrative films, commercials, music videos and branded content crafted with a cinematic eye and emotional precision.</span>
+            <span class="lang-ar font-arabic leading-loose">أفلام روائية، إعلانات، كليبات موسيقية ومحتوى علامات تجارية بعين سينمائية ودقة عاطفية.</span>
+          </p>
+        </div>
+        
+        <div class="service-card border border-ruya-silver/12 p-8 md:p-10 reveal">
+          <div class="w-12 h-12 mb-8 border border-ruya-silver/25 rounded-full flex items-center justify-center">
+            <span class="text-ruya-silver text-xs tracking-wider">02</span>
+          </div>
+          <h3 class="text-xl md:text-2xl font-light mb-4">
+            <span class="lang-en">Photography</span>
+            <span class="lang-ar font-arabic">التصوير الفوتوغرافي</span>
+          </h3>
+          <p class="text-ruya-silver/80 text-sm leading-relaxed">
+            <span class="lang-en">Portraits, editorial, events and commercial stills — every image built to hold attention and memory.</span>
+            <span class="lang-ar font-arabic leading-loose">بورتريهات، تصوير تحريري، فعاليات وصور تجارية — كل صورة مبنية لشد الانتباه والذاكرة.</span>
+          </p>
+        </div>
+        
+        <div class="service-card border border-ruya-silver/12 p-8 md:p-10 reveal">
+          <div class="w-12 h-12 mb-8 border border-ruya-silver/25 rounded-full flex items-center justify-center">
+            <span class="text-ruya-silver text-xs tracking-wider">03</span>
+          </div>
+          <h3 class="text-xl md:text-2xl font-light mb-4">
+            <span class="lang-en">Direction & Edit</span>
+            <span class="lang-ar font-arabic">الإخراج والمونتاج</span>
+          </h3>
+          <p class="text-ruya-silver/80 text-sm leading-relaxed">
+            <span class="lang-en">Full post-production pipeline — color grading, sound design, pacing and final delivery ready for any platform.</span>
+            <span class="lang-ar font-arabic leading-loose">خط إنتاج كامل — ألوان، صوت، إيقاع وتسليم نهائي جاهز لأي منصة.</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== CONTACT ==================== -->
+  <section id="contact" class="relative py-28 md:py-40 px-6 border-t border-ruya-silver/8">
+    <div class="max-w-3xl mx-auto text-center reveal">
+      <p class="text-ruya-silver text-[10px] tracking-[0.35em] uppercase mb-5 font-medium">
+        <span class="lang-en">04 — Contact</span>
+        <span class="lang-ar font-arabic tracking-normal">04 — تواصل</span>
+      </p>
+      
+      <h2 class="text-3xl md:text-5xl lg:text-6xl font-light leading-[1.15] mb-8">
+        <span class="lang-en">Let's create something<br><span class="text-ruya-silver">worth remembering.</span></span>
+        <span class="lang-ar font-arabic">لنصنع شيئاً<br><span class="text-ruya-silver">يستحق التذكر.</span></span>
+      </h2>
+      
+      <p class="text-ruya-silver/70 mb-14 max-w-md mx-auto text-sm md:text-base">
+        <span class="lang-en">Available for projects worldwide. Drop a message — let's talk vision.</span>
+        <span class="lang-ar font-arabic leading-loose">متاحون لمشاريع في جميع أنحاء العالم. أرسل رسالة — لنتحدث عن الرؤية.</span>
+      </p>
+      
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+        <a href="mailto:hello@ruya.studio" class="btn-primary inline-block border border-ruya-offwhite px-10 py-4 text-[11px] tracking-[0.25em] uppercase font-medium w-full sm:w-auto">
+          hello@ruya.studio
+        </a>
+        <a href="https://instagram.com/" target="_blank" rel="noopener" class="inline-block border border-ruya-silver/30 px-10 py-4 text-[11px] tracking-[0.25em] uppercase text-ruya-silver hover:border-ruya-offwhite hover:text-ruya-offwhite transition-all duration-300 w-full sm:w-auto">
+          Instagram
+        </a>
+      </div>
+      
+      <div class="flex items-center justify-center gap-10 text-[11px] tracking-[0.2em] uppercase text-ruya-silver/60">
+        <a href="#" class="hover:text-ruya-offwhite transition-colors">Vimeo</a>
+        <a href="#" class="hover:text-ruya-offwhite transition-colors">YouTube</a>
+        <a href="#" class="hover:text-ruya-offwhite transition-colors">Behance</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-12 px-6 border-t border-ruya-silver/8">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <img src="assets/logo-white.png" alt="RUYA" class="h-5 w-auto opacity-40" />
+      <p class="text-ruya-silver/40 text-[10px] tracking-[0.2em] uppercase">
+        <span class="lang-en">© 2026 RUYA · See it. Frame it. Remember it.</span>
+        <span class="lang-ar font-arabic tracking-normal">© 2026 رؤية · شوفها. صوّرها. تذكّرها.</span>
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // ===== LOADER =====
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loader').classList.add('done');
+        // Trigger hero animations
+        document.querySelector('.hero-logo')?.classList.add('loaded');
+        document.querySelector('.hero-text')?.classList.add('loaded');
+        document.querySelector('.hero-cta')?.classList.add('loaded');
+      }, 900);
+    });
+
+    // ===== LANGUAGE TOGGLE =====
+    const html = document.documentElement;
+    document.getElementById('langToggle').addEventListener('click', () => {
+      const isAr = html.getAttribute('lang') === 'ar';
+      html.setAttribute('lang', isAr ? 'en' : 'ar');
+      html.setAttribute('dir', isAr ? 'ltr' : 'rtl');
+    });
+
+    // ===== MOBILE MENU =====
+    const mobileMenu = document.getElementById('mobileMenu');
+    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+    mobileMenu.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+    });
+
+    // ===== NAV SCROLL =====
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 60) {
+        navbar.classList.add('nav-scrolled');
+      } else {
+        navbar.classList.remove('nav-scrolled');
+      }
+    });
+
+    // ===== REVEAL ON SCROLL =====
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // ===== CURSOR GLOW =====
+    const glow = document.getElementById('cursorGlow');
+    if (window.matchMedia('(hover: hover)').matches) {
+      document.addEventListener('mousemove', (e) => {
+        glow.style.left = e.clientX + 'px';
+        glow.style.top = e.clientY + 'px';
+      });
+    }
+  </script>
+</body>
+</html>
